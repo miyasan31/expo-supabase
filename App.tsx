@@ -5,7 +5,7 @@ import { supabase } from "./src/utils/supabaseInit";
 
 export default function App() {
 	const fetch = async () => {
-		const { data, error, status } = await supabase.from("profiles").select("*");
+		const { data, error, status } = await supabase.from("posts").select("*");
 		console.log(data);
 	};
 
