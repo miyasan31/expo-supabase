@@ -1,12 +1,31 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { supabase } from "./src/utils/supabaseInit";
 
+/** URL polyfill. Required for Supabase queries to work in React Native. */
+import "react-native-url-polyfill/auto";
+
+type Post = {
+	id: number;
+	title: string;
+	postText: string;
+	username: string;
+};
+
 export default function App() {
+	const [state, setState] = useState<Post[]>([]);
+
 	const fetch = async () => {
-		const { data, error, status } = await supabase.from("posts").select("*");
-		console.log(data);
+		try {
+			const { data, error } = await supabase.from<Post>("posts").select("*");
+			if (error) {
+				throw new Error("エラーが起きました");
+			}
+			setState(data!);
+		} catch (err) {
+			console.log(err);
+		}
 	};
 
 	useEffect(() => {
@@ -15,7 +34,14 @@ export default function App() {
 
 	return (
 		<View style={styles.container}>
-			<Text>みやさんのアプリ</Text>
+			<FlatList
+				scrollEnabled={true}
+				data={state}
+				keyExtractor={(item) => `${item.id}`}
+				renderItem={({ item: post }) => (
+					<Text>{post.username}さんのアプリ</Text>
+				)}
+			/>
 			<StatusBar style="auto" />
 		</View>
 	);
@@ -23,7 +49,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
+		diplay: "flex",
 		backgroundColor: "#fff",
 		alignItems: "center",
 		justifyContent: "center",
